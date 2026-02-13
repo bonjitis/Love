@@ -15,12 +15,13 @@
       padding: 2rem;
       line-height: 1.6;
       font-family: "ETBook", serif;
+      overflow-x: hidden;
     }
 
     .poem-container {
-      max-width: 600px;
+      max-width: 650px;
       margin: 0 auto;
-      padding-top: 20vh;
+      padding-top: 18vh;
     }
 
     p {
@@ -37,7 +38,7 @@
       border-right: 2px solid #d8dee9;
       width: 0;
       opacity: 1 !important;
-      animation: typing 3s steps(40, end) forwards,
+      animation: typing 4s steps(50, end) forwards,
                  blink 0.8s step-end infinite;
     }
 
@@ -48,6 +49,22 @@
 
     @keyframes blink {
       50% { border-color: transparent; }
+    }
+
+    /* Flickering intrusive messages */
+    .whisper {
+      position: fixed;
+      color: #d8dee9;
+      font-size: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      animation: flicker 0.15s infinite alternate;
+      z-index: 9999;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0.15; }
+      100% { opacity: 0.9; }
     }
 
     @media (max-width: 600px) {
@@ -63,17 +80,28 @@
 
 <body>
 
-  <!-- Background audio (starts muted until user interacts) -->
+  <!-- Background audio -->
   <audio id="bg-audio" src="your-audio-file.mp3" loop></audio>
 
   <div class="poem-container">
 
     <!-- Typing line -->
-    <p id="typed-line">the air folds inward</p>
+    <p id="typed-line">wake up and breathe in the empty</p>
 
     <!-- Scroll‑revealed lines -->
-    <p class="line">as if listening</p>
-    <p class="line">for something colder than silence</p>
+    <p class="line">watch yourself blow away</p>
+    <p class="line">after an hour or two</p>
+    <p class="line">you can play a videogame</p>
+
+    <p class="line">quiet is what you are used to</p>
+    <p class="line">so why not embrace the truth</p>
+    <p class="line">let go, stare into the glow</p>
+    <p class="line">breathe in deep unlock your phone</p>
+
+    <p class="line">I am someone who cares</p>
+    <p class="line">You are something that needs</p>
+    <p class="line">Separated we are nothing, isn't that love after all?</p>
+    <p class="line">So love me and keep me by your side</p>
 
   </div>
 
@@ -84,6 +112,7 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
+    // Fade-in scroll animation
     gsap.utils.toArray(".line").forEach((line) => {
       gsap.fromTo(line,
         { opacity: 0, y: 40 },
@@ -106,19 +135,55 @@
 
     function startAudio() {
       if (!audioStarted) {
-        audio.volume = 0.25; // subtle atmosphere
+        audio.volume = 0.25;
         audio.play().catch(() => {});
         audioStarted = true;
       }
     }
 
-    // Trigger on scroll, click, or touch
     window.addEventListener("scroll", startAudio, { once: true });
     window.addEventListener("click", startAudio, { once: true });
     window.addEventListener("touchstart", startAudio, { once: true });
     window.addEventListener("mousemove", startAudio, { once: true });
+
+    // RANDOM FLICKERING MESSAGES
+    const whispers = [
+      "don't leave me",
+      "I love you",
+      "don't look away"
+    ];
+
+    function spawnWhisper() {
+      const whisper = document.createElement("div");
+      whisper.className = "whisper";
+      whisper.textContent = whispers[Math.floor(Math.random() * whispers.length)];
+
+      // Random position
+      whisper.style.left = Math.random() * 80 + "vw";
+      whisper.style.top = Math.random() * 80 + "vh";
+
+      document.body.appendChild(whisper);
+
+      // Fade in
+      gsap.to(whisper, { opacity: 1, duration: 0.4 });
+
+      // Fade out + remove
+      setTimeout(() => {
+        gsap.to(whisper, {
+          opacity: 0,
+          duration: 0.6,
+          onComplete: () => whisper.remove()
+        });
+      }, 1200);
+    }
+
+    // Spawn whispers at random intervals
+    setInterval(() => {
+      if (Math.random() < 0.4) { // 40% chance each interval
+        spawnWhisper();
+      }
+    }, 2500);
   </script>
 
 </body>
 </html>
-
