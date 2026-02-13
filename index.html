@@ -1,1 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cold Signal</title>
+
+  <!-- Tufte CSS -->
+  <link rel="stylesheet" href="https://edwardtufte.github.io/tufte-css/tufte.css">
+
+  <style>
+    body {
+      background: #0b0c10;
+      color: #d8dee9;
+      padding: 2rem;
+      line-height: 1.6;
+      font-family: "ETBook", serif;
+    }
+
+    .poem-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding-top: 20vh;
+    }
+
+    p {
+      font-size: 1.3rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+    }
+
+    /* Typing effect */
+    #typed-line {
+      font-size: 1.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 2px solid #d8dee9;
+      width: 0;
+      opacity: 1 !important;
+      animation: typing 3s steps(40, end) forwards,
+                 blink 0.8s step-end infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+
+    @media (max-width: 600px) {
+      p, #typed-line {
+        font-size: 1.1rem;
+      }
+      .poem-container {
+        padding-top: 10vh;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="poem-container">
+
+    <!-- Typing line -->
+    <p id="typed-line">the air folds inward</p>
+
+    <!-- Scroll‑revealed lines -->
+    <p class="line">as if listening</p>
+    <p class="line">for something colder than silence</p>
+
+  </div>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.utils.toArray(".line").forEach((line) => {
+      gsap.fromTo(line,
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.2,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: line,
+            start: "top 85%"
+          }
+        }
+      );
+    });
+  </script>
+
+</body>
+</html>
 
