@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voyeurs Dirge</title>
+  <title>Cold Signal</title>
 
   <!-- Tufte CSS -->
   <link rel="stylesheet" href="https://edwardtufte.github.io/tufte-css/tufte.css">
@@ -30,25 +30,20 @@
       opacity: 0;
     }
 
-    /* Typing effect */
+    /* Typed line base style */
     #typed-line {
-      font-size: 1.3rem;
       white-space: nowrap;
       overflow: hidden;
       border-right: 2px solid #d8dee9;
-      width: 0;
-      opacity: 1 !important;
-      animation: typing 4s steps(50, end) forwards,
-                 blink 0.8s step-end infinite;
+      opacity: 1;
     }
 
-    @keyframes typing {
-      from { width: 0; }
-      to { width: 100%; }
-    }
-
+    /* Blinking cursor */
     @keyframes blink {
       50% { border-color: transparent; }
+    }
+    #typed-line {
+      animation: blink 0.8s step-end infinite;
     }
 
     /* Flickering intrusive messages */
@@ -80,13 +75,13 @@
 
 <body>
 
-  <!-- Background audio -->
-  <audio id="bg-audio" src="your-audio-file.mp3" loop></audio>
+  <!-- Background audio (starts only after interaction) -->
+  <audio id="Siren_shimmer.mp3" src="./siren_shimmer.mp3 loop></audio>
 
   <div class="poem-container">
 
-    <!-- Typing line -->
-    <p id="typed-line">wake up and breathe in the empty</p>
+    <!-- Typing line: text stored in data-text, JS will type it -->
+    <p id="typed-line" data-text="wake up and breathe in the empty"></p>
 
     <!-- Scroll‑revealed lines -->
     <p class="line">watch yourself blow away</p>
@@ -112,7 +107,23 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    // Fade-in scroll animation
+    // JS typing effect for the first line
+    const typedEl = document.getElementById("typed-line");
+    const typedText = typedEl.getAttribute("data-text");
+    let typedIndex = 0;
+
+    function typeChar() {
+      if (typedIndex <= typedText.length) {
+        typedEl.textContent = typedText.slice(0, typedIndex);
+        typedIndex++;
+        setTimeout(typeChar, 70); // typing speed
+      }
+    }
+    // Ensure it's visible and start typing
+    typedEl.style.opacity = 1;
+    typeChar();
+
+    // Fade-in scroll animation for other lines
     gsap.utils.toArray(".line").forEach((line) => {
       gsap.fromTo(line,
         { opacity: 0, y: 40 },
@@ -135,7 +146,7 @@
 
     function startAudio() {
       if (!audioStarted) {
-        audio.volume = 0.25;
+        audio.volume = 0.25; // soft, atmospheric
         audio.play().catch(() => {});
         audioStarted = true;
       }
@@ -146,12 +157,14 @@
     window.addEventListener("touchstart", startAudio, { once: true });
     window.addEventListener("mousemove", startAudio, { once: true });
 
-    // RANDOM FLICKERING MESSAGES
+    // RANDOM FLICKERING MESSAGES THAT INTENSIFY OVER TIME
     const whispers = [
       "don't leave me",
       "I love you",
       "don't look away"
     ];
+
+    const startTime = Date.now();
 
     function spawnWhisper() {
       const whisper = document.createElement("div");
@@ -164,10 +177,8 @@
 
       document.body.appendChild(whisper);
 
-      // Fade in
       gsap.to(whisper, { opacity: 1, duration: 0.4 });
 
-      // Fade out + remove
       setTimeout(() => {
         gsap.to(whisper, {
           opacity: 0,
@@ -177,9 +188,15 @@
       }, 1200);
     }
 
-    // Spawn whispers at random intervals
     setInterval(() => {
-      if (Math.random() < 0.4) { // 40% chance each interval
+      const elapsedSeconds = (Date.now() - startTime) / 1000;
+      // Intensity grows over time, capped
+      const intensity = Math.min(1, elapsedSeconds / 60); // reaches max after ~60s
+      const baseChance = 0.2;
+      const extraChance = 0.5 * intensity; // up to +0.5
+      const chance = baseChance + extraChance;
+
+      if (Math.random() < chance) {
         spawnWhisper();
       }
     }, 2500);
