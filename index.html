@@ -63,6 +63,9 @@
 
 <body>
 
+  <!-- Background audio (starts muted until user interacts) -->
+  <audio id="bg-audio" src="your-audio-file.mp3" loop></audio>
+
   <div class="poem-container">
 
     <!-- Typing line -->
@@ -96,6 +99,24 @@
         }
       );
     });
+
+    // AUDIO STARTS ON FIRST USER INTERACTION
+    const audio = document.getElementById("bg-audio");
+    let audioStarted = false;
+
+    function startAudio() {
+      if (!audioStarted) {
+        audio.volume = 0.25; // subtle atmosphere
+        audio.play().catch(() => {});
+        audioStarted = true;
+      }
+    }
+
+    // Trigger on scroll, click, or touch
+    window.addEventListener("scroll", startAudio, { once: true });
+    window.addEventListener("click", startAudio, { once: true });
+    window.addEventListener("touchstart", startAudio, { once: true });
+    window.addEventListener("mousemove", startAudio, { once: true });
   </script>
 
 </body>
