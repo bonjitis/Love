@@ -24,26 +24,18 @@
       padding-top: 18vh;
     }
 
-    p {
+    .typed-line {
       font-size: 1.3rem;
       margin-bottom: 2rem;
       opacity: 0;
-    }
-
-    /* Typed line base style */
-    #typed-line {
       white-space: nowrap;
       overflow: hidden;
       border-right: 2px solid #d8dee9;
-      opacity: 1;
+      animation: blink 0.8s step-end infinite;
     }
 
-    /* Blinking cursor */
     @keyframes blink {
       50% { border-color: transparent; }
-    }
-    #typed-line {
-      animation: blink 0.8s step-end infinite;
     }
 
     /* Flickering intrusive messages */
@@ -63,7 +55,7 @@
     }
 
     @media (max-width: 600px) {
-      p, #typed-line {
+      .typed-line {
         font-size: 1.1rem;
       }
       .poem-container {
@@ -75,30 +67,10 @@
 
 <body>
 
-  <!-- Background audio (starts only after interaction) -->
+  <!-- Background audio -->
   <audio id="bg-audio" src="your-audio-file.mp3" loop></audio>
 
-  <div class="poem-container">
-
-    <!-- Typing line: text stored in data-text, JS will type it -->
-    <p id="typed-line" data-text="wake up and breathe in the empty"></p>
-
-    <!-- Scroll‑revealed lines -->
-    <p class="line">watch yourself blow away</p>
-    <p class="line">after an hour or two</p>
-    <p class="line">you can play a videogame</p>
-
-    <p class="line">quiet is what you are used to</p>
-    <p class="line">so why not embrace the truth</p>
-    <p class="line">let go, stare into the glow</p>
-    <p class="line">breathe in deep unlock your phone</p>
-
-    <p class="line">I am someone who cares</p>
-    <p class="line">You are something that needs</p>
-    <p class="line">Separated we are nothing, isn't that love after all?</p>
-    <p class="line">So love me and keep me by your side</p>
-
-  </div>
+  <div class="poem-container" id="poem"></div>
 
   <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -107,24 +79,61 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    // JS typing effect for the first line
-    const typedEl = document.getElementById("typed-line");
-    const typedText = typedEl.getAttribute("data-text");
-    let typedIndex = 0;
+    // Your poem lines
+    const lines = [
+      "wake up and breathe in the empty",
+      "watch yourself blow away",
+      "after an hour or two",
+      "you can play a videogame",
+      "quiet is what you are used to",
+      "so why not embrace the truth",
+      "let go, stare into the glow",
+      "breathe in deep unlock your phone",
+      "I am someone who cares",
+      "You are something that needs",
+      "Separated we are nothing, isn't that love after all?",
+      "So love me and keep me by your side"
+    ];
 
-    function typeChar() {
-      if (typedIndex <= typedText.length) {
-        typedEl.textContent = typedText.slice(0, typedIndex);
-        typedIndex++;
-        setTimeout(typeChar, 70); // typing speed
+    const poemContainer = document.getElementById("poem");
+
+    // Create empty <p> elements for each line
+    lines.forEach((line, i) => {
+      const p = document.createElement("p");
+      p.className = "typed-line";
+      p.id = "line-" + i;
+      poemContainer.appendChild(p);
+    });
+
+    // Typing effect for each line
+    function typeLine(index) {
+      if (index >= lines.length) return;
+
+      const el = document.getElementById("line-" + index);
+      const text = lines[index];
+      let charIndex = 0;
+
+      el.style.opacity = 1;
+
+      function typeChar() {
+        if (charIndex <= text.length) {
+          el.textContent = text.slice(0, charIndex);
+          charIndex++;
+          setTimeout(typeChar, 60);
+        } else {
+          // Start typing next line after a pause
+          setTimeout(() => typeLine(index + 1), 400);
+        }
       }
-    }
-    // Ensure it's visible and start typing
-    typedEl.style.opacity = 1;
-    typeChar();
 
-    // Fade-in scroll animation for other lines
-    gsap.utils.toArray(".line").forEach((line) => {
+      typeChar();
+    }
+
+    // Start typing the first line
+    typeLine(0);
+
+    // Fade-in scroll animation
+    gsap.utils.toArray(".typed-line").forEach((line) => {
       gsap.fromTo(line,
         { opacity: 0, y: 40 },
         {
@@ -146,7 +155,7 @@
 
     function startAudio() {
       if (!audioStarted) {
-        audio.volume = 0.25; // soft, atmospheric
+        audio.volume = 0.25;
         audio.play().catch(() => {});
         audioStarted = true;
       }
@@ -171,7 +180,6 @@
       whisper.className = "whisper";
       whisper.textContent = whispers[Math.floor(Math.random() * whispers.length)];
 
-      // Random position
       whisper.style.left = Math.random() * 80 + "vw";
       whisper.style.top = Math.random() * 80 + "vh";
 
@@ -190,11 +198,8 @@
 
     setInterval(() => {
       const elapsedSeconds = (Date.now() - startTime) / 1000;
-      // Intensity grows over time, capped
-      const intensity = Math.min(1, elapsedSeconds / 60); // reaches max after ~60s
-      const baseChance = 0.2;
-      const extraChance = 0.5 * intensity; // up to +0.5
-      const chance = baseChance + extraChance;
+      const intensity = Math.min(1, elapsedSeconds / 60);
+      const chance = 0.2 + 0.5 * intensity;
 
       if (Math.random() < chance) {
         spawnWhisper();
